@@ -1,6 +1,5 @@
 package com.ijonaservicesinterview.employeeapplication.service;
 import com.ijonaservicesinterview.employeeapplication.entity.Employee;
-import com.ijonaservicesinterview.employeeapplication.exception.ResourceNotFoundException;
 import com.ijonaservicesinterview.employeeapplication.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

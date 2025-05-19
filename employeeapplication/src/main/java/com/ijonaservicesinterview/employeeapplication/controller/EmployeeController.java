@@ -1,7 +1,6 @@
 package com.ijonaservicesinterview.employeeapplication.controller;
 
 import com.ijonaservicesinterview.employeeapplication.entity.Employee;
-import com.ijonaservicesinterview.employeeapplication.exception.ResourceNotFoundException;
 import com.ijonaservicesinterview.employeeapplication.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
