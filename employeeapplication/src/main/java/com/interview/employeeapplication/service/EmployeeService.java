@@ -1,5 +1,5 @@
-package com.ijonaservicesinterview.employeeapplication.service;
-import com.ijonaservicesinterview.employeeapplication.entity.Employee;
+package com.interview.employeeapplication.service;
+import com.interview.employeeapplication.entity.Employee;
 
 import java.util.List;
 

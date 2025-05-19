@@ -1,7 +1,7 @@
-package com.ijonaservicesinterview.employeeapplication.controller;
+package com.interview.employeeapplication.controller;
 
-import com.ijonaservicesinterview.employeeapplication.entity.Employee;
-import com.ijonaservicesinterview.employeeapplication.service.EmployeeService;
+import com.interview.employeeapplication.entity.Employee;
+import com.interview.employeeapplication.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

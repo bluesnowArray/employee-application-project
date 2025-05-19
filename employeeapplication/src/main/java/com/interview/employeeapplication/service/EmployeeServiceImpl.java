@@ -1,6 +1,6 @@
-package com.ijonaservicesinterview.employeeapplication.service;
-import com.ijonaservicesinterview.employeeapplication.entity.Employee;
-import com.ijonaservicesinterview.employeeapplication.repository.EmployeeRepository;
+package com.interview.employeeapplication.service;
+import com.interview.employeeapplication.entity.Employee;
+import com.interview.employeeapplication.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.ijonaservicesinterview.employeeapplication.entity;
+package com.interview.employeeapplication.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

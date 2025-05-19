@@ -1,5 +1,5 @@
-package com.ijonaservicesinterview.employeeapplication.repository;
-import com.ijonaservicesinterview.employeeapplication.entity.Employee;
+package com.interview.employeeapplication.repository;
+import com.interview.employeeapplication.entity.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

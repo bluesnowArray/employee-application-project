@@ -1,4 +1,4 @@
-package com.ijonaservicesinterview.employeeapplication;
+package com.interview.employeeapplication;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
