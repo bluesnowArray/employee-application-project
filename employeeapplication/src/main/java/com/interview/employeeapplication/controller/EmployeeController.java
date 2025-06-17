@@ -1,58 +1,98 @@
 package com.interview.employeeapplication.controller;
 
+import com.interview.employeeapplication.dto.EmployeeRequest;
+import com.interview.employeeapplication.dto.EmployeeResponse;
 import com.interview.employeeapplication.entity.Employee;
+import com.interview.employeeapplication.exception.ResourceNotFoundException;
 import com.interview.employeeapplication.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {
+
     @Autowired
     private EmployeeService employeeService;
 
+
     @GetMapping
-    public List<Employee> getAllEmployees() {
-        return employeeService.getAllEmployees();
+    public List<EmployeeResponse> getAllEmployees() {
+        return employeeService.getAllEmployees()
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
+
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getEmployeeById(@PathVariable(value = "id") Long employeeId) {
-
-            Employee employee = employeeService.getEmployeeById(employeeId);
-
-        if (employee != null) {
-            return ResponseEntity.ok().body(employee);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee Not Found With id:"+employeeId);
-        }
-
-
+    public ResponseEntity<EmployeeResponse> getEmployeeById(@PathVariable Long id) {
+        return employeeService.getEmployeeById(id)
+                .map(e -> ResponseEntity.ok(toResponse(e)))
+                .orElseGet(() ->
+                        ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body(null)
+                );
     }
+
 
     @PostMapping
-    public Employee createEmployee(@Valid @RequestBody Employee employee) {
-        return employeeService.addEmployee(employee);
+    public ResponseEntity<EmployeeResponse> createEmployee(
+            @Valid @RequestBody EmployeeRequest req) {
+
+        Employee saved = employeeService.addEmployee(toEntity(req));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(toResponse(saved));
     }
+
 
     @PutMapping("/{id}")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable(value = "id") Long employeeId,
-                                                   @Valid @RequestBody Employee employeeDetails) {
-        Employee employee = employeeService.getEmployeeById(employeeId);
-        employee.setName(employeeDetails.getName());
-        employee.setEmail(employeeDetails.getEmail());
-        employee.setDepartment(employeeDetails.getDepartment());
-        final Employee updatedEmployee = employeeService.updateEmployee(employee);
-        return ResponseEntity.ok(updatedEmployee);
+    public ResponseEntity<EmployeeResponse> updateEmployee(
+            @PathVariable Long id,
+            @Valid @RequestBody EmployeeRequest req) {
+
+        Employee updated = employeeService.getEmployeeById(id)
+                .map(existing -> {
+                    existing.setName(req.getName());
+                    existing.setEmail(req.getEmail());
+                    existing.setDepartment(req.getDepartment());
+                    return employeeService.updateEmployee(existing);
+                })
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("No employee with id: " + id)
+                );
+
+        return ResponseEntity.ok(toResponse(updated));
     }
 
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable(value = "id") Long employeeId) {
-        employeeService.deleteEmployee(employeeId);
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        employeeService.deleteEmployee(id);
         return ResponseEntity.ok().build();
+    }
+
+
+    private Employee toEntity(EmployeeRequest r) {
+        Employee e = new Employee();
+        e.setName(r.getName());
+        e.setEmail(r.getEmail());
+        e.setDepartment(r.getDepartment());
+        return e;
+    }
+
+    private EmployeeResponse toResponse(Employee e) {
+        return new EmployeeResponse(
+                e.getId(),
+                e.getName(),
+                e.getEmail(),
+                e.getDepartment()
+        );
     }
 }
