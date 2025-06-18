@@ -4,9 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.Size;
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.NotBlank;
+
 
 
 @Entity
@@ -16,17 +14,14 @@ public class Employee {
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
 
-        @NotBlank
-        @Size(max = 50)
+
         private String name;
 
-        @NotBlank
-        @Size(max = 50)
-        @Email
+
+
         private String email;
 
-        @NotBlank
-        @Size(max = 50)
+
         private String department;
 
         public Long getId() {
