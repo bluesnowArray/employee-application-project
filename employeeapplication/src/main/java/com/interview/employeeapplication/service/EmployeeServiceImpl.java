@@ -1,69 +1,88 @@
 package com.interview.employeeapplication.service;
+
+import com.interview.employeeapplication.dto.EmployeeRequest;
+import com.interview.employeeapplication.dto.EmployeeResponse;
 import com.interview.employeeapplication.entity.Employee;
-import com.interview.employeeapplication.repository.EmployeeRepository;
-import com.interview.employeeapplication.exception.ResourceNotFoundException;
 import com.interview.employeeapplication.exception.ResourceConflictException;
+import com.interview.employeeapplication.exception.ResourceNotFoundException;
+import com.interview.employeeapplication.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
+
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private EmployeeRepository repository;
 
     @Override
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+    public Page<EmployeeResponse> getAllEmployees(Pageable pageable) {
+               return repository.findAll(pageable)
+                                .map(this::toResponse);
     }
 
     @Override
-    public Optional<Employee> getEmployeeById(Long id) {
-
-        return employeeRepository.findById(id);
+    public EmployeeResponse getEmployeeById(Long id) {
+        Employee e = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found: " + id));
+        return toResponse(e);
     }
 
-
     @Override
-    public Employee addEmployee(Employee employee) {
-        // Edge case: duplicate email ⇒ 409
-        if (employeeRepository.existsByEmail(employee.getEmail())) {
-            throw new ResourceConflictException(
-                    "Email already in use: " + employee.getEmail()
-            );
+    public EmployeeResponse createEmployee(EmployeeRequest req) {
+        // status code 409 if email already exists
+        if (repository.existsByEmail(req.getEmail())) {
+            throw new ResourceConflictException("Email already in use: " + req.getEmail());
         }
-        return employeeRepository.save(employee);
+        Employee saved = repository.save(toEntity(req));
+        return toResponse(saved);
     }
 
     @Override
-    public Employee updateEmployee(Employee employee) {
-        // Edge case: missing record ⇒ 404
-        if (!employeeRepository.existsById(employee.getId())) {
-            throw new ResourceNotFoundException(
-                    "No employee with id: " + employee.getId()
-            );
-        }
-        // Edge case: email used by somebody else ⇒ 409
-        employeeRepository.findByEmail(employee.getEmail())
-                .filter(e -> !e.getId().equals(employee.getId()))
+    public EmployeeResponse updateEmployee(Long id, EmployeeRequest req) {
+        Employee existing = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found: " + id));
+        // status code 409 if another record has this email
+        repository.findByEmail(req.getEmail())
+                .filter(e -> !e.getId().equals(id))
                 .ifPresent(e -> {
-                    throw new ResourceConflictException(
-                            "Email already in use: " + employee.getEmail()
-                    );
+                    throw new ResourceConflictException("Email already in use: " + req.getEmail());
                 });
-        return employeeRepository.save(employee);
+        existing.setName(req.getName());
+        existing.setEmail(req.getEmail());
+        existing.setDepartment(req.getDepartment());
+        Employee updated = repository.save(existing);
+        return toResponse(updated);
     }
 
     @Override
     public void deleteEmployee(Long id) {
-        // Edge case: delete non-existent record ⇒ 404
-        if (!employeeRepository.existsById(id)) {
-            throw new ResourceNotFoundException(
-                    "No employee with id: " + id
-            );
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Employee not found: " + id);
         }
-        employeeRepository.deleteById(id);
+        repository.deleteById(id);
+    }
+
+
+
+    private Employee toEntity(EmployeeRequest r) {
+        Employee e = new Employee();
+        e.setName(r.getName());
+        e.setEmail(r.getEmail());
+        e.setDepartment(r.getDepartment());
+        return e;
+    }
+
+    private EmployeeResponse toResponse(Employee e) {
+        return new EmployeeResponse(
+                e.getId(),
+                e.getName(),
+                e.getEmail(),
+                e.getDepartment()
+        );
     }
 }
-
